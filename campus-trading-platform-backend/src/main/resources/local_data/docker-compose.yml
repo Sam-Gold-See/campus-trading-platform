@@ -1,0 +1,22 @@
+services:
+  # MySQL 服务
+  db:
+    image: mysql:8.4
+    container_name: local_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    # 自行配置本地MySQL数据物理存储位置
+    volumes:
+      - D:/Docker/local-data:/var/lib/mysql
+
+  # Redis Stack 服务 (包含 Redis 和 可视化界面)
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: local_redis_stack
+    restart: always
+    ports:
+      - "6379:6379"
+      - "8001:8001"
