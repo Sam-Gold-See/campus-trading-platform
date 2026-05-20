@@ -1,6 +1,7 @@
 DROP SCHEMA IF EXISTS `campus_trading_platform`;
 CREATE SCHEMA `campus_trading_platform`;
-USE `campus_trading_platform`;
+USE
+`campus_trading_platform`;
 
 -- ----------------------------
 -- 1. Table structure for user (用户表)
@@ -14,7 +15,7 @@ CREATE TABLE `user`
     `nickname`      VARCHAR(50)  NOT NULL COMMENT '昵称',
     `avatar_url`    VARCHAR(255) DEFAULT NULL COMMENT '头像（采用系统默认或淡化处理的URL）',
     `credit_score`  INT          DEFAULT 100 COMMENT '信用分（初始100）',
-    `status`        TINYINT      DEFAULT 1 COMMENT '账号状态 (1正常, 0禁言拦截发布)',
+    `user_status`   TINYINT      DEFAULT 1 COMMENT '账号状态 (1正常, 0禁言拦截发布)',
     `created_at`    DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_email` (`edu_email`)
@@ -44,13 +45,13 @@ CREATE TABLE `item`
     `price`           DECIMAL(10, 2) DEFAULT NULL COMMENT '期望价格（NULL代表面议）',
     `content`         VARCHAR(500) NOT NULL COMMENT '纯文本描述',
     `image_url`       VARCHAR(255)   DEFAULT NULL COMMENT '补充实物图（仅限1张缩略图）',
-    `status`          TINYINT        DEFAULT 0 COMMENT '状态 (0展示中, 1已成交, 2已失效, 3已删除)',
+    `item_status`     TINYINT        DEFAULT 0 COMMENT '状态 (0展示中, 1已成交, 2已失效, 3已删除)',
     `matched_user_id` BIGINT         DEFAULT NULL COMMENT '成交方用户ID',
     `created_at`      DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '发布/擦亮时间',
     `expire_at`       DATETIME     NOT NULL COMMENT '过期时间',
     PRIMARY KEY (`id`),
     -- 组合筛选索引
-    INDEX             `idx_search` (`status`, `type`, `category_id`, `campus`),
+    INDEX             `idx_search` (`item_status`, `type`, `category_id`, `campus`),
     -- 用于关联查询发布者的索引
     INDEX             `idx_user_id` (`user_id`),
     -- 文本搜索索引

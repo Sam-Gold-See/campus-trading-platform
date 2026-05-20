@@ -10,7 +10,7 @@
 | `nickname`      | VARCHAR(50)  | NOT NULL              | 昵称                  |
 | `avatar_url`    | VARCHAR(255) | NULL                  | 头像（采用系统默认或淡化处理的URL） |
 | `credit_score`  | INT          | DEFAULT 100           | **信用分**（初始100）      |
-| `status`        | TINYINT      | DEFAULT 1             | 账号状态 (1正常, 0禁言拦截发布) |
+| `user_status`   | TINYINT      | DEFAULT 1             | 账号状态 (1正常, 0禁言拦截发布) |
 | `created_at`    | DATETIME     | CURRENT_TIMESTAMP     | 注册时间                |
 
 ### 2. `category` (分类字典表)
@@ -37,13 +37,13 @@
 | `price`           | DECIMAL(10,2) | NULL                  | 期望价格（NULL代表 面议）             |
 | `content`         | VARCHAR(500)  | NOT NULL              | **纯文本描述**（限制字数内）            |
 | `image_url`       | VARCHAR(255)  | NULL                  | 补充实物图（仅限1张缩略图URL）           |
-| `status`          | TINYINT       | DEFAULT 0             | 状态 (0展示中, 1已成交, 2已失效, 3已删除) |
+| `item_status`     | TINYINT       | DEFAULT 0             | 状态 (0展示中, 1已成交, 2已失效, 3已删除) |
 | `matched_user_id` | BIGINT        | NULL                  | **成交方用户ID**（状态转为1时必须填入该值）   |
 | `created_at`      | DATETIME      | CURRENT_TIMESTAMP     | 发布时间（“擦亮”功能即更新此字段）          |
 | `expire_at`       | DATETIME      | NOT NULL              | 过期时间（配合自动失效逻辑，通常+14天）       |
 
 * **核心索引建议**：
-    * 联合索引 `idx_search (status, type, category_id, campus)`：用于多维组合筛选的极速响应。
+    * 联合索引 `idx_search (item_status, type, category_id, campus)`：用于多维组合筛选的极速响应。
     * 全文索引 `FULLTEXT(content)`（MySQL 5.7+支持）：用于文本的模糊模糊搜索。
 
 ### 4. `message` (站内信/私信表)
@@ -79,7 +79,7 @@
 
 ### 数据库设计亮点与业务映射：
 
-1. **极简的交易流转**：摒弃传统电商系统的 `Order` 表。只要发布者将 `item.status` 修改为 `1 (已成交)`，并选中系统提供的
+1. **极简的交易流转**：摒弃传统电商系统的 `Order` 表。只要发布者将 `item.item_status` 修改为 `1 (已成交)`，并选中系统提供的
    `matched_user_id`，一个撮合闭环即可成立，极大降低数据库联表查询成本。
 2. **消息上下文不丢**：`message` 表中关联了 `item_id`，完美支持PRD中“聊天界面顶部带入商品卡片防误解”的前端需求。
 3. **信用分自动计算接口预留**：通过监听对 `review` 表的 `INSERT` 操作（或使用简单的定时任务/Mybatis后置插件），实时统计
