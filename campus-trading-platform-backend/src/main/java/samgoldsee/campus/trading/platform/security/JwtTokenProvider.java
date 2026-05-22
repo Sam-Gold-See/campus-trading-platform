@@ -73,7 +73,7 @@ public class JwtTokenProvider {
 	 */
 	public String generateToken(String userId) {
 		Date now = new Date();
-		Date expiryDate = new Date(now.getTime() + jwtPropertiesConfig.getExpiration() * 1000);
+		Date expiryDate = new Date(now.getTime() + jwtPropertiesConfig.getExpire() * 1000);
 
 		Map<String, Object> claims = new HashMap<>();
 		claims.put(IDENTIFY, userId);
@@ -132,7 +132,7 @@ public class JwtTokenProvider {
 	 * 获取Token过期时间戳
 	 */
 	public Long getExpirationTime() {
-		return System.currentTimeMillis() / 1000 + jwtPropertiesConfig.getExpiration();
+		return System.currentTimeMillis() / 1000 + jwtPropertiesConfig.getExpire();
 	}
 
 	/**

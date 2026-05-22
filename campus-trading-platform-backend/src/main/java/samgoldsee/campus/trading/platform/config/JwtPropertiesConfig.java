@@ -23,5 +23,5 @@ public class JwtPropertiesConfig {
 	/**
 	 * Token过期时间
 	 */
-	private Long expiration = 86400L;
+	private Long expire = 86400L;
 }
