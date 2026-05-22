@@ -13,5 +13,5 @@ ctp:
     secret: samgoldsee.campus.trading.platform.CampusTradingPlatformBackendApplicationJWT
     expire: 86400
   root:
-    edu-email: root@edu.com
+    edu-email: root@scnu.edu.com
     password: 123456
