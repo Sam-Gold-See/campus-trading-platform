@@ -1,3 +1,29 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: campus-trading-platform-backend
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  datasource:
+    driver-class-name: ${ctp.datasource.driver-class-name}
+    url: jdbc:mysql://${ctp.datasource.host}:${ctp.datasource.port}/${ctp.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${ctp.datasource.username}
+    password: ${ctp.datasource.password}
+  data:
+    redis:
+      host: ${ctp.redis.host}
+      port: ${ctp.redis.port}
+      password: ${ctp.redis.password}
+      database: ${ctp.redis.database}
+
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.ctp.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
