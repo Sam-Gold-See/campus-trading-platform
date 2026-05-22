@@ -1,6 +1,5 @@
 ctp:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
     port: 3306
     database: campus_trading_platform
@@ -11,5 +10,8 @@ ctp:
     port: 6379
     database: 0
   jwt:
-    secret: samgoldsee.campus.trading.platform.CampusTradingPlatformBackendApplication
+    secret: samgoldsee.campus.trading.platform.CampusTradingPlatformBackendApplicationJWT
     expire: 86400
+  root:
+    edu-email: root@edu.com
+    password: 123456

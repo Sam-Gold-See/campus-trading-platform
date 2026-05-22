@@ -45,7 +45,7 @@ public class SecurityConfig {
 	 * Security过滤器链配置
 	 */
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) {
 		http
 				// 禁用CSRF（使用JWT不需要CSRF保护）
 				.csrf(AbstractHttpConfigurer::disable)
@@ -60,6 +60,8 @@ public class SecurityConfig {
 
 				// 配置授权规则
 				.authorizeHttpRequests(auth -> auth
+						// 登录接口允许匿名访问
+						.requestMatchers("/api/user/login").permitAll()
 						// 其他所有请求都需要认证
 						.anyRequest().authenticated()
 				)
