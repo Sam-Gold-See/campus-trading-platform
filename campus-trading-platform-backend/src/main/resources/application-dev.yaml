@@ -3,10 +3,13 @@ ctp:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
     port: 3306
-    database: sky_take_out
+    database: campus_trading_platform
     username: root
     password: 123456
   redis:
     host: 127.0.0.1
     port: 6379
     database: 0
+  jwt:
+    secret: samgoldsee.campus.trading.platform.CampusTradingPlatformBackendApplication
+    expire: 86400

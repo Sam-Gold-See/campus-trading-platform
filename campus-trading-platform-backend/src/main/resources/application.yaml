@@ -27,3 +27,8 @@ mybatis:
   configuration:
     #开启驼峰命名
     map-underscore-to-camel-case: true
+
+jwt:
+  # 密钥至少需要 256 bits (32 字节)，这里使用 64 字符的密钥确保足够安全
+  secret: ${ctp.jwt.secret}
+  expire: ${ctp.jwt.expire}
