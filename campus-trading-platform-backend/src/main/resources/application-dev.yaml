@@ -15,3 +15,6 @@ ctp:
   root:
     edu-email: root@scnu.edu.com
     password: 123456
+  mail:
+    username: campus_trading@163.com
+    password: YHPH7rcRumMGGydS

@@ -18,6 +18,13 @@ spring:
       host: ${ctp.redis.host}
       port: ${ctp.redis.port}
       database: ${ctp.redis.database}
+  mail:
+    host: smtp.163.com
+    port: 465
+    username: ${ctp.mail.username}
+    password: ${ctp.mail.password}
+    protocol: smtp
+    default-encoding: UTF-8
 
 mybatis:
   #mapper配置文件
