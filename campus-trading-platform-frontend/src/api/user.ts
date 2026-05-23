@@ -1,14 +1,30 @@
 import request from '@/utils/request'
-import type { LoginParams, LoginResult, User } from '@/types/user'
+import type { AuthResult, User, EditNicknameParams, EditPasswordParams, RegisterParams } from '@/types/user'
 
-export function login(params: LoginParams) {
-  return request.post<LoginResult>('/user/login', params)
+export function login(params: { eduEmail: string; password?: string; verificationCode?: string }) {
+  return request.post<AuthResult>('/user/login', params)
 }
 
-export function register(params: LoginParams) {
-  return request.post<never>('/user/register', params)
+export function sendRegisterCode(eduEmail: string) {
+  return request.post<never>('/user/sendRegisterCode', { eduEmail })
 }
 
-export function getUserInfo() {
-  return request.get<User>('/user/info')
+export function register(params: RegisterParams) {
+  return request.post<AuthResult>('/user/register', params)
+}
+
+export function getUserProfile() {
+  return request.get<User>('/user/profile')
+}
+
+export function editNickname(params: EditNicknameParams) {
+  return request.put<never>('/user/editNickname', params)
+}
+
+export function editPassword(params: EditPasswordParams) {
+  return request.put<never>('/user/editPassword', params)
+}
+
+export function logout() {
+  return request.post<never>('/user/logout')
 }

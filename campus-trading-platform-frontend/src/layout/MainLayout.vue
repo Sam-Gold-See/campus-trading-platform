@@ -39,7 +39,7 @@ const handleLogout = () => {
           {{ isCollapse ? '展开' : '收起' }}
         </span>
         <span>
-          {{ userStore.nickname }} |
+          {{ userStore.userInfo?.nickname ?? '用户' }} |
           <a @click="handleLogout" style="cursor: pointer">退出</a>
         </span>
       </ElHeader>

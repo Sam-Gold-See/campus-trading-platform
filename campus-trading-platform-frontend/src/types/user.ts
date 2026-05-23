@@ -1,10 +1,12 @@
 export interface User {
-  userId: number
+  id: number
   eduEmail: string
   nickname: string
-  creditScore: number
   avatarUrl?: string
-  createTime: string
+  creditScore: number
+  userStatus: number // 0=正常, 1=禁用
+  isAdmin: number // 0=普通用户, 1=管理员
+  createdAt: string
 }
 
 export interface LoginParams {
@@ -14,11 +16,25 @@ export interface LoginParams {
 
 export interface RegisterParams {
   eduEmail: string
+  verificationCode: string
+  nickname: string
   password: string
+  confirmPassword: string
+}
+
+export interface AuthResult {
+  id: number
+  nickname: string
+  token: string
+  accessExpire: number
+}
+
+export interface EditNicknameParams {
   nickname: string
 }
 
-export interface LoginResult {
-  token: string
-  user: User
+export interface EditPasswordParams {
+  oldPassword: string
+  newPassword: string
+  confirmNewPassword: string
 }
