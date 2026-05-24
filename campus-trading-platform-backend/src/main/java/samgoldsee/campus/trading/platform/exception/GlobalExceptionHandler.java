@@ -2,10 +2,14 @@ package samgoldsee.campus.trading.platform.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import samgoldsee.campus.trading.platform.common.CommonResult;
+
+import java.util.stream.Collectors;
 
 /**
  * 全局异常处理器
@@ -36,6 +40,19 @@ public class GlobalExceptionHandler {
 	public CommonResult<?> handleIllegalArgumentException(IllegalArgumentException e) {
 		log.error("Illegal argument exception: {}", e.getMessage(), e);
 		return CommonResult.fail(e.getMessage());
+	}
+
+	/**
+	 * 处理参数绑定异常
+	 */
+	@ExceptionHandler(BindException.class)
+	@ResponseStatus(HttpStatus.OK)
+	public CommonResult<?> handleBindException(BindException e) {
+		log.error("Bind exception: {}", e.getMessage());
+		String errorMsg = e.getFieldErrors().stream()
+				.map(FieldError::getDefaultMessage)
+				.collect(Collectors.joining(", "));
+		return CommonResult.fail(errorMsg);
 	}
 
 	/**
