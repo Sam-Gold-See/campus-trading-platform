@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,6 +31,19 @@ public class GlobalExceptionHandler {
 	public CommonResult<?> handleBusinessException(BusinessException e) {
 		log.error("Business exception: {}", e.getMessage(), e);
 		return CommonResult.fail(e.getCode(), e.getMessage());
+	}
+
+	/**
+	 * 处理参数校验异常
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(HttpStatus.OK)
+	public CommonResult<?> handleValidationException(MethodArgumentNotValidException e) {
+		log.error("Validation exception: {}", e.getMessage());
+		String errorMsg = e.getBindingResult().getFieldErrors().stream()
+				.map(FieldError::getDefaultMessage)
+				.collect(Collectors.joining(", "));
+		return CommonResult.fail(errorMsg);
 	}
 
 	/**
