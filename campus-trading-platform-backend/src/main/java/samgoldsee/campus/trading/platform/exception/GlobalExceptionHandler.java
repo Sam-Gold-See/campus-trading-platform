@@ -2,6 +2,7 @@ package samgoldsee.campus.trading.platform.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -67,6 +68,16 @@ public class GlobalExceptionHandler {
 				.map(FieldError::getDefaultMessage)
 				.collect(Collectors.joining(", "));
 		return CommonResult.fail(errorMsg);
+	}
+
+	/**
+	 * 处理访问拒绝异常 (无权限)
+	 */
+	@ExceptionHandler(AccessDeniedException.class)
+	@ResponseStatus(HttpStatus.OK)
+	public CommonResult<?> handleAccessDeniedException(AccessDeniedException e) {
+		log.error("Access denied: {}", e.getMessage());
+		return CommonResult.fail(403, "没有访问权限");
 	}
 
 	/**
