@@ -4,17 +4,25 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
+import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
+import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
 import samgoldsee.campus.trading.platform.entity.User;
+import samgoldsee.campus.trading.platform.enums.EmailActionEnum;
 import samgoldsee.campus.trading.platform.enums.IsAdminEnum;
 import samgoldsee.campus.trading.platform.enums.UserStatusEnum;
 import samgoldsee.campus.trading.platform.exception.BusinessException;
 import samgoldsee.campus.trading.platform.mapper.UserMapper;
 import samgoldsee.campus.trading.platform.security.JwtTokenProvider;
 import samgoldsee.campus.trading.platform.service.UserService;
+import samgoldsee.campus.trading.platform.util.EmailUtils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author HuangChunXin
@@ -28,12 +36,17 @@ public class UserServiceImpl implements UserService {
 	private final UserMapper userMapper;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final StringRedisTemplate stringRedisTemplate;
 
 	@Value("${ctp.root.edu-email}")
 	private String rootEduEmail;
 
 	@Value("${ctp.root.password}")
 	private String rootPassword;
+
+	private static final String REGISTER_CODE_PREFIX = "register:email:";
+	private static final long CODE_EXPIRE_MINUTES = 5;
+	private static final long SEND_CODE_INTERVAL_SECONDS = 60;
 
 	@PostConstruct
 	@Override
@@ -77,6 +90,115 @@ public class UserServiceImpl implements UserService {
 		return LoginResp.builder()
 				.id(user.getId())
 				.nickname(user.getNickname())
+				.token(token)
+				.accessExpire(expireTime)
+				.build();
+	}
+
+	@Override
+	public void sendRegisterCode(SendRegisterCodeReq request) {
+		String email = request.getEduEmail();
+
+		// 校验邮箱格式（必须是 *.edu.cn）
+		if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.edu\\.cn$")) {
+			throw new BusinessException("必须是有效的.edu.cn教育邮箱");
+		}
+
+		// 检查邮箱是否已注册
+		if (userMapper.findByEduEmail(email) != null) {
+			throw new BusinessException("该邮箱已被注册");
+		}
+
+		// 限流检查：同一邮箱60秒内只能发送一次
+		String rateLimitKey = REGISTER_CODE_PREFIX + "rate:" + email;
+		Boolean isRateLimited = stringRedisTemplate.hasKey(rateLimitKey);
+		if (Boolean.TRUE.equals(isRateLimited)) {
+			throw new BusinessException("请勿频繁发送验证码，请60秒后再试");
+		}
+
+		// 生成6位随机验证码
+		String code = String.format("%06d", (int) (Math.random() * 1000000));
+
+		// 存储验证码到Redis，有效期5分钟
+		String redisKey = REGISTER_CODE_PREFIX + email;
+		stringRedisTemplate.opsForValue().set(redisKey, code, CODE_EXPIRE_MINUTES, TimeUnit.MINUTES);
+
+		// 设置限流标记，有效期60秒
+		stringRedisTemplate.opsForValue().set(rateLimitKey, "1", SEND_CODE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+
+		// 发送邮件
+		try {
+			EmailUtils.sendVerificationCode(email, EmailActionEnum.REGISTER, code);
+			log.info("注册验证码发送成功，邮箱: {}", email);
+		} catch (Exception e) {
+			// 发送失败时删除Redis中的验证码
+			stringRedisTemplate.delete(redisKey);
+			stringRedisTemplate.delete(rateLimitKey);
+			log.error("发送注册验证码失败，邮箱: {}", email, e);
+			throw new BusinessException("验证码发送失败，请稍后重试");
+		}
+	}
+
+	@Override
+	public LoginResp register(RegisterReq request) {
+		String email = request.getEduEmail();
+		String verificationCode = request.getVerificationCode();
+		String nickname = request.getNickname();
+		String password = request.getPassword();
+		String confirmPassword = request.getConfirmPassword();
+
+		// 校验两次密码是否一致
+		if (!password.equals(confirmPassword)) {
+			throw new BusinessException("两次输入的密码不一致");
+		}
+
+		// 验证验证码有效性
+		String redisKey = REGISTER_CODE_PREFIX + email;
+		String storedCode = stringRedisTemplate.opsForValue().get(redisKey);
+		if (storedCode == null || !storedCode.equals(verificationCode)) {
+			throw new BusinessException("验证码无效或已过期");
+		}
+
+		// 检查邮箱是否已注册
+		if (userMapper.findByEduEmail(email) != null) {
+			throw new BusinessException("该邮箱已被注册");
+		}
+
+		// 校验昵称唯一性
+		if (userMapper.countByNickname(nickname) > 0) {
+			throw new BusinessException("该昵称已被使用，请更换");
+		}
+
+		// 使用BCrypt对密码进行加盐哈希
+		String passwordHash = passwordEncoder.encode(password);
+
+		// 创建用户对象
+		User user = User.builder()
+				.eduEmail(email)
+				.passwordHash(passwordHash)
+				.nickname(nickname)
+				.creditScore(100)
+				.userStatus(UserStatusEnum.NORMAL.getCode())
+				.isAdmin(IsAdminEnum.USER.getCode())
+				.build();
+
+		// 保存用户到数据库
+		userMapper.insertOrUpdate(user);
+
+		// 删除Redis中的验证码
+		stringRedisTemplate.delete(redisKey);
+
+		// 生成JWT Token
+		User savedUser = userMapper.findByEduEmail(email);
+		String token = jwtTokenProvider.generateToken(String.valueOf(savedUser.getId()));
+		Long expireTime = jwtTokenProvider.getExpirationTime();
+
+		log.info("用户注册成功，邮箱: {}, 用户ID: {}", email, savedUser.getId());
+
+		// 返回注册响应
+		return LoginResp.builder()
+				.id(savedUser.getId())
+				.nickname(savedUser.getNickname())
 				.token(token)
 				.accessExpire(expireTime)
 				.build();

@@ -3,6 +3,9 @@ package samgoldsee.campus.trading.platform.service;
 import jakarta.validation.Valid;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
+import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
+import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
+
 
 /**
  * @author HuangChunXin
@@ -19,4 +22,14 @@ public interface UserService {
 	 * 用户登录
 	 */
 	LoginResp login(@Valid LoginReq request);
+
+	/**
+	 * 发送注册验证码
+	 */
+	void sendRegisterCode(@Valid SendRegisterCodeReq request);
+
+	/**
+	 * 用户注册
+	 */
+	LoginResp register(@Valid RegisterReq request);
 }
