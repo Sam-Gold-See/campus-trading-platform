@@ -50,4 +50,11 @@ public interface UserMapper {
    			where edu_email = #{eduEmail}
 			""")
 	User findByEduEmail(@Param("eduEmail") String eduEmail);
+
+	@Select("""
+			select count(1)
+   			from user
+   			where nickname = #{nickname}
+			""")
+	int countByNickname(@Param("nickname") String nickname);
 }
