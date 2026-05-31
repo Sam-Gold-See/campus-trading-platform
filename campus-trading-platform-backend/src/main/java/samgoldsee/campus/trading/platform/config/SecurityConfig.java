@@ -60,8 +60,10 @@ public class SecurityConfig {
 
 				// 配置授权规则
 				.authorizeHttpRequests(auth -> auth
-						// 登录接口允许匿名访问
+						// 登录和注册接口允许匿名访问
 						.requestMatchers("/api/user/login").permitAll()
+						.requestMatchers("/api/user/sendRegisterCode").permitAll()
+						.requestMatchers("/api/user/register").permitAll()
 						// 其他所有请求都需要认证
 						.anyRequest().authenticated()
 				)
