@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
 import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
 import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
@@ -21,6 +22,7 @@ import samgoldsee.campus.trading.platform.mapper.UserMapper;
 import samgoldsee.campus.trading.platform.security.JwtTokenProvider;
 import samgoldsee.campus.trading.platform.service.UserService;
 import samgoldsee.campus.trading.platform.util.EmailUtils;
+
 
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +49,8 @@ public class UserServiceImpl implements UserService {
 	private static final String REGISTER_CODE_PREFIX = "register:email:";
 	private static final long CODE_EXPIRE_MINUTES = 5;
 	private static final long SEND_CODE_INTERVAL_SECONDS = 60;
+	private static final String NICKNAME_COOLDOWN_PREFIX = "nickname:cooldown:";
+	private static final long NICKNAME_COOLDOWN_DAYS = 30;
 
 	@PostConstruct
 	@Override
@@ -202,5 +206,43 @@ public class UserServiceImpl implements UserService {
 				.token(token)
 				.accessExpire(expireTime)
 				.build();
+	}
+
+	@Override
+	public void editNickname(Long userId, EditNicknameReq request) {
+		String newNickname = request.getNickname();
+
+		// 检查冷却期：每30天仅能修改一次
+		String cooldownKey = NICKNAME_COOLDOWN_PREFIX + userId;
+		Boolean inCooldown = stringRedisTemplate.hasKey(cooldownKey);
+		if (Boolean.TRUE.equals(inCooldown)) {
+			throw new BusinessException("昵称30天内仅能修改一次，当前仍在冷却期内");
+		}
+
+		// 获取当前用户信息
+		User currentUser = userMapper.findById(userId);
+		if (currentUser == null) {
+			throw new BusinessException("用户不存在");
+		}
+
+		// 昵称未变化则无需更新
+		if (newNickname.equals(currentUser.getNickname())) {
+			return;
+		}
+
+		// 校验昵称唯一性
+		if (userMapper.countByNickname(newNickname) > 0) {
+			throw new BusinessException("该昵称已被使用，请更换");
+		}
+
+		// 更新昵称
+		userMapper.updateNickname(userId, newNickname);
+
+		// 设置冷却期
+		stringRedisTemplate.opsForValue().set(
+				cooldownKey, "1",
+				NICKNAME_COOLDOWN_DAYS, TimeUnit.DAYS);
+
+		log.info("昵称修改成功，用户ID: {}, 新昵称: {}", userId, newNickname);
 	}
 }

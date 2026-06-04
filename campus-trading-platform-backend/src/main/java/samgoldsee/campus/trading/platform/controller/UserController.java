@@ -2,12 +2,15 @@ package samgoldsee.campus.trading.platform.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import samgoldsee.campus.trading.platform.common.CommonResult;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
 import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
 import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
@@ -49,5 +52,12 @@ public class UserController {
 	public CommonResult<LoginResp> register(@Valid @RequestBody RegisterReq request) {
 		LoginResp response = userService.register(request);
 		return CommonResult.ok(response);
+	}
+
+	@PutMapping("/editNickname")
+	public CommonResult<Void> editNickname(@Valid @RequestBody EditNicknameReq request) {
+		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		userService.editNickname(Long.valueOf(userId), request);
+		return CommonResult.ok();
 	}
 }

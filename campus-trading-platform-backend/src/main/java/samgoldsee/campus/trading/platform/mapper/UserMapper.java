@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import samgoldsee.campus.trading.platform.entity.User;
 
 /**
@@ -46,15 +47,29 @@ public interface UserMapper {
 
 	@Select("""
 			select *
-   			from user
-   			where edu_email = #{eduEmail}
+	   			from user
+	   			where edu_email = #{eduEmail}
 			""")
 	User findByEduEmail(@Param("eduEmail") String eduEmail);
 
 	@Select("""
 			select count(1)
-   			from user
-   			where nickname = #{nickname}
+	   			from user
+	   			where nickname = #{nickname}
 			""")
 	int countByNickname(@Param("nickname") String nickname);
+
+	@Select("""
+			select *
+			from user
+			where id = #{id}
+			""")
+	User findById(@Param("id") Long id);
+
+	@Update("""
+			update user
+			set nickname = #{nickname}, updated_at = CURRENT_TIMESTAMP
+			where id = #{id}
+			""")
+	int updateNickname(@Param("id") Long id, @Param("nickname") String nickname);
 }
