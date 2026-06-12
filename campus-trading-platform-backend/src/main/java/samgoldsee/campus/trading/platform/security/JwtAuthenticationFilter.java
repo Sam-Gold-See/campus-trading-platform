@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -26,6 +27,9 @@ import java.util.ArrayList;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
+	private final StringRedisTemplate stringRedisTemplate;
+
+	private static final String TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
 
 	/**
 	 * 过滤器核心逻辑
@@ -39,6 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			// 从请求中提取JWT Token
 			String jwt = getJwtFromRequest(request);
+
+			// 检查Token是否在黑名单中
+			if (StringUtils.isNotEmpty(jwt) && isTokenBlacklisted(jwt)) {
+				log.warn("Token已被加入黑名单，拒绝访问");
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token已失效，请重新登录");
+				return;
+			}
 
 			// 如果Token存在且有效，则设置认证消息
 			if (StringUtils.isNotEmpty(jwt) && jwtTokenProvider.validateToken(jwt)) {
@@ -71,6 +82,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		// 继续过滤器链
 		filterChain.doFilter(request, response);
+	}
+
+	/**
+	 * 检查Token是否在黑名单中
+	 */
+	private boolean isTokenBlacklisted(String token) {
+		Boolean exists = stringRedisTemplate.hasKey(TOKEN_BLACKLIST_PREFIX + token);
+		return Boolean.TRUE.equals(exists);
 	}
 
 	/**

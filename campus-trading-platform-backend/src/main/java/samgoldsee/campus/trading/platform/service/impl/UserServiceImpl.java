@@ -48,11 +48,15 @@ public class UserServiceImpl implements UserService {
 	@Value("${ctp.root.password}")
 	private String rootPassword;
 
+	@Value("${jwt.expire}")
+	private long jwtExpireSeconds;
+
 	private static final String REGISTER_CODE_PREFIX = "register:email:";
 	private static final long CODE_EXPIRE_MINUTES = 5;
 	private static final long SEND_CODE_INTERVAL_SECONDS = 60;
 	private static final String NICKNAME_COOLDOWN_PREFIX = "nickname:cooldown:";
 	private static final long NICKNAME_COOLDOWN_DAYS = 30;
+	private static final String TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
 
 	@PostConstruct
 	@Override
@@ -296,5 +300,13 @@ public class UserServiceImpl implements UserService {
 				.isAdmin(user.getIsAdmin())
 				.createdAt(user.getCreatedAt())
 				.build();
+	}
+
+	@Override
+	public void logout(String token) {
+		stringRedisTemplate.opsForValue().set(
+				TOKEN_BLACKLIST_PREFIX + token, "1",
+				jwtExpireSeconds, TimeUnit.SECONDS);
+		log.info("用户登出成功，Token已加入黑名单");
 	}
 }

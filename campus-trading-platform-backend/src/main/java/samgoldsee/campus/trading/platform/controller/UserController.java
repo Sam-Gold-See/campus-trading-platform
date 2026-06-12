@@ -1,5 +1,6 @@
 package samgoldsee.campus.trading.platform.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,5 +77,12 @@ public class UserController {
 		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		UserProfileResp response = userService.getProfile(Long.valueOf(userId));
 		return CommonResult.ok(response);
+	}
+
+	@PostMapping("/logout")
+	public CommonResult<Void> logout(HttpServletRequest request) {
+		String token = (String) request.getAttribute("Authorization");
+		userService.logout(token);
+		return CommonResult.ok();
 	}
 }

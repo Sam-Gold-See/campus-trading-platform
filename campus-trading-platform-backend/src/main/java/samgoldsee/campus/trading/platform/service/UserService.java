@@ -50,4 +50,9 @@ public interface UserService {
 	 * 获取用户资料
 	 */
 	UserProfileResp getProfile(Long userId);
+
+	/**
+	 * 登出
+	 */
+	void logout(String token);
 }
