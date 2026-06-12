@@ -72,4 +72,11 @@ public interface UserMapper {
 			where id = #{id}
 			""")
 	int updateNickname(@Param("id") Long id, @Param("nickname") String nickname);
+
+	@Update("""
+			update user
+			set password_hash = #{passwordHash}, updated_at = CURRENT_TIMESTAMP
+			where id = #{id}
+			""")
+	int updatePassword(@Param("id") Long id, @Param("passwordHash") String passwordHash);
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import samgoldsee.campus.trading.platform.common.CommonResult;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
+import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
 import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
 import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
@@ -58,6 +59,13 @@ public class UserController {
 	public CommonResult<Void> editNickname(@Valid @RequestBody EditNicknameReq request) {
 		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		userService.editNickname(Long.valueOf(userId), request);
+		return CommonResult.ok();
+	}
+
+	@PutMapping("/editPassword")
+	public CommonResult<Void> editPassword(@Valid @RequestBody EditPasswordReq request) {
+		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		userService.editPassword(Long.valueOf(userId), request);
 		return CommonResult.ok();
 	}
 }

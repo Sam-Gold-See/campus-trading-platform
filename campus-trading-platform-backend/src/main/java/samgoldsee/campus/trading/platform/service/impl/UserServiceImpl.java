@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
+import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
 import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
 import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
@@ -244,5 +245,37 @@ public class UserServiceImpl implements UserService {
 				NICKNAME_COOLDOWN_DAYS, TimeUnit.DAYS);
 
 		log.info("昵称修改成功，用户ID: {}, 新昵称: {}", userId, newNickname);
+	}
+
+	@Override
+	public void editPassword(Long userId, EditPasswordReq request) {
+		String oldPassword = request.getOldPassword();
+		String newPassword = request.getNewPassword();
+		String confirmNewPassword = request.getConfirmNewPassword();
+
+		// ① 两次新密码是否一致
+		if (!newPassword.equals(confirmNewPassword)) {
+			throw new BusinessException("两次输入的新密码不一致");
+		}
+
+		// ② 新密码不能和旧密码一样
+		if (oldPassword.equals(newPassword)) {
+			throw new BusinessException("新密码不能与旧密码相同");
+		}
+
+		// ③ 获取当前用户，验证旧密码是否正确
+		User currentUser = userMapper.findById(userId);
+		if (currentUser == null) {
+			throw new BusinessException("用户不存在");
+		}
+		if (!passwordEncoder.matches(oldPassword, currentUser.getPasswordHash())) {
+			throw new BusinessException("旧密码输入错误");
+		}
+
+		// ④ 加密新密码并更新
+		String newPasswordHash = passwordEncoder.encode(newPassword);
+		userMapper.updatePassword(userId, newPasswordHash);
+
+		log.info("密码修改成功，用户ID: {}", userId);
 	}
 }

@@ -3,6 +3,7 @@ package samgoldsee.campus.trading.platform.service;
 import jakarta.validation.Valid;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
+import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
 import samgoldsee.campus.trading.platform.dto.request.RegisterReq;
 import samgoldsee.campus.trading.platform.dto.request.SendRegisterCodeReq;
@@ -38,4 +39,9 @@ public interface UserService {
 	 * 修改昵称
 	 */
 	void editNickname(Long userId, @Valid EditNicknameReq request);
+
+	/**
+	 * 修改密码
+	 */
+	void editPassword(Long userId, @Valid EditPasswordReq request);
 }
