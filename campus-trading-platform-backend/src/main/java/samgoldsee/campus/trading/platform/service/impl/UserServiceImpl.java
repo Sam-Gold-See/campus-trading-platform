@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
@@ -277,5 +278,23 @@ public class UserServiceImpl implements UserService {
 		userMapper.updatePassword(userId, newPasswordHash);
 
 		log.info("密码修改成功，用户ID: {}", userId);
+	}
+
+	@Override
+	public UserProfileResp getProfile(Long userId) {
+		User user = userMapper.findById(userId);
+		if (user == null) {
+			throw new BusinessException("用户不存在");
+		}
+		return UserProfileResp.builder()
+				.id(user.getId())
+				.eduEmail(user.getEduEmail())
+				.nickname(user.getNickname())
+				.avatarUrl(user.getAvatarUrl())
+				.creditScore(user.getCreditScore())
+				.userStatus(user.getUserStatus())
+				.isAdmin(user.getIsAdmin())
+				.createdAt(user.getCreatedAt())
+				.build();
 	}
 }

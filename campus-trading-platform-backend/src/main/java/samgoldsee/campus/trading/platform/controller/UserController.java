@@ -3,6 +3,7 @@ package samgoldsee.campus.trading.platform.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import samgoldsee.campus.trading.platform.common.CommonResult;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
@@ -67,5 +69,12 @@ public class UserController {
 		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		userService.editPassword(Long.valueOf(userId), request);
 		return CommonResult.ok();
+	}
+
+	@GetMapping("/profile")
+	public CommonResult<UserProfileResp> getProfile() {
+		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		UserProfileResp response = userService.getProfile(Long.valueOf(userId));
+		return CommonResult.ok(response);
 	}
 }

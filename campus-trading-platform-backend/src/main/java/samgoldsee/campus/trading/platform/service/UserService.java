@@ -2,6 +2,7 @@ package samgoldsee.campus.trading.platform.service;
 
 import jakarta.validation.Valid;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
 import samgoldsee.campus.trading.platform.dto.request.LoginReq;
@@ -44,4 +45,9 @@ public interface UserService {
 	 * 修改密码
 	 */
 	void editPassword(Long userId, @Valid EditPasswordReq request);
+
+	/**
+	 * 获取用户资料
+	 */
+	UserProfileResp getProfile(Long userId);
 }
