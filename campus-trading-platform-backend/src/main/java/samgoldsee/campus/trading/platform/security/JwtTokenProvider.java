@@ -136,6 +136,13 @@ public class JwtTokenProvider {
 	}
 
 	/**
+	 * 根据Token获取过期时间戳
+	 */
+	public Long getExpirationTime(String token) {
+		return parseToken(token).getExpiration().getTime() / 1000;
+	}
+
+	/**
 	 * 解析Token获取Claims
 	 */
 	private Claims parseToken(String token) {

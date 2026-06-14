@@ -3,10 +3,12 @@ package samgoldsee.campus.trading.platform.service.impl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import samgoldsee.campus.trading.platform.config.JwtPropertiesConfig;
 import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
 import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
@@ -41,15 +43,13 @@ public class UserServiceImpl implements UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final StringRedisTemplate stringRedisTemplate;
+	private final JwtPropertiesConfig jwtPropertiesConfig;
 
 	@Value("${ctp.root.edu-email}")
 	private String rootEduEmail;
 
 	@Value("${ctp.root.password}")
 	private String rootPassword;
-
-	@Value("${jwt.expire}")
-	private long jwtExpireSeconds;
 
 	private static final String REGISTER_CODE_PREFIX = "register:email:";
 	private static final long CODE_EXPIRE_MINUTES = 5;
@@ -305,8 +305,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void logout(String token) {
 		stringRedisTemplate.opsForValue().set(
-				TOKEN_BLACKLIST_PREFIX + token, "1",
-				jwtExpireSeconds, TimeUnit.SECONDS);
+				TOKEN_BLACKLIST_PREFIX + token, "",
+				jwtTokenProvider.getExpirationTime(token), TimeUnit.SECONDS);
 		log.info("用户登出成功，Token已加入黑名单");
 	}
 }
