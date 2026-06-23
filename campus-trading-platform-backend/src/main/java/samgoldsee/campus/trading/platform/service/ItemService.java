@@ -6,4 +6,7 @@ public interface ItemService {
 
 	/** 查询我的发布 */
 	ItemListResp getMyItems(Long userId, Integer status, int page, int size);
+
+	/** 提前下架 */
+	void offline(Long userId, Long itemId);
 }

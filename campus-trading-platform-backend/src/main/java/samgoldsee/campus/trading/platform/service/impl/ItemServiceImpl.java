@@ -3,8 +3,10 @@ package samgoldsee.campus.trading.platform.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import samgoldsee.campus.trading.platform.constant.MessageConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.ItemListResp;
 import samgoldsee.campus.trading.platform.dto.reponse.ItemResp;
+import samgoldsee.campus.trading.platform.exception.BusinessException;
 import samgoldsee.campus.trading.platform.mapper.ItemMapper;
 import samgoldsee.campus.trading.platform.service.ItemService;
 
@@ -29,5 +31,22 @@ public class ItemServiceImpl implements ItemService {
 				.page(page)
 				.size(size)
 				.build();
+	}
+
+	@Override
+	public void offline(Long userId, Long itemId) {
+		ItemResp item = itemMapper.findById(itemId);
+		if (item == null) {
+			throw new BusinessException(MessageConstant.ITEM_NOT_FOUND);
+		}
+		if (item.getItemStatus() != 0) {
+			throw new BusinessException(MessageConstant.ITEM_STATUS_INVALID);
+		}
+		Long ownerId = itemMapper.findUserIdById(itemId);
+		if (ownerId == null || !ownerId.equals(userId)) {
+			throw new BusinessException(MessageConstant.ITEM_NOT_OWNER);
+		}
+		itemMapper.offline(itemId, userId);
+		log.info("帖文下架成功，itemId: {}, userId: {}", itemId, userId);
 	}
 }

@@ -92,10 +92,26 @@ public interface ItemMapper {
 			""")
 	int bump(@Param("id") Long id);
 
+	@Select("""
+			SELECT user_id
+			FROM item
+			WHERE id = #{id}
+			""")
+	Long findUserIdById(@Param("id") Long id);
+
 	@Update("""
 			UPDATE item
 			SET item_status = 1, matched_user_id = #{matchedUserId}
 			WHERE id = #{id}
 			""")
 	int markSold(@Param("id") Long id, @Param("matchedUserId") Long matchedUserId);
+
+	@Update("""
+			UPDATE item
+			SET item_status = 2
+			WHERE id = #{id}
+			  AND user_id = #{userId}
+			  AND item_status = 0
+			""")
+	int offline(@Param("id") Long id, @Param("userId") Long userId);
 }
