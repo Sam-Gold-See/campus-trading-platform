@@ -2,6 +2,7 @@ package samgoldsee.campus.trading.platform.service;
 
 import jakarta.validation.Valid;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.ReviewListResp;
 import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
@@ -55,4 +56,9 @@ public interface UserService {
 	 * 登出
 	 */
 	void logout(String token);
+
+	/**
+	 * 获取用户评价列表
+	 */
+	ReviewListResp getReviews(Long targetUserId, int page, int size);
 }

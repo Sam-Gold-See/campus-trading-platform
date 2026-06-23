@@ -12,6 +12,8 @@ import samgoldsee.campus.trading.platform.constant.AccountConstant;
 import samgoldsee.campus.trading.platform.constant.MessageConstant;
 import samgoldsee.campus.trading.platform.constant.RedisConstant;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.ReviewListResp;
+import samgoldsee.campus.trading.platform.dto.reponse.ReviewResp;
 import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
@@ -23,11 +25,13 @@ import samgoldsee.campus.trading.platform.enums.EmailActionEnum;
 import samgoldsee.campus.trading.platform.enums.IsAdminEnum;
 import samgoldsee.campus.trading.platform.enums.UserStatusEnum;
 import samgoldsee.campus.trading.platform.exception.BusinessException;
+import samgoldsee.campus.trading.platform.mapper.ReviewMapper;
 import samgoldsee.campus.trading.platform.mapper.UserMapper;
 import samgoldsee.campus.trading.platform.security.JwtTokenProvider;
 import samgoldsee.campus.trading.platform.service.UserService;
 import samgoldsee.campus.trading.platform.util.EmailUtils;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl implements UserService {
 
 	private final UserMapper userMapper;
+	private final ReviewMapper reviewMapper;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final StringRedisTemplate stringRedisTemplate;
@@ -253,14 +258,38 @@ public class UserServiceImpl implements UserService {
 		}
 		return UserProfileResp.builder()
 				.id(user.getId())
-				.eduEmail(user.getEduEmail())
+				.eduEmail(maskEmail(user.getEduEmail()))
 				.nickname(user.getNickname())
 				.avatarUrl(user.getAvatarUrl())
 				.creditScore(user.getCreditScore())
+				.creditBadge(getCreditBadge(user.getCreditScore()))
 				.userStatus(user.getUserStatus())
 				.isAdmin(user.getIsAdmin())
 				.createdAt(user.getCreatedAt())
 				.build();
+	}
+
+	/** 邮箱脱敏：t***6@m.scnu.edu.cn */
+	private String maskEmail(String email) {
+		if (email == null || !email.contains("@")) {
+			return email;
+		}
+		String[] parts = email.split("@");
+		String local = parts[0];
+		String domain = parts[1];
+		if (local.length() <= 1) {
+			return email;
+		}
+		return local.charAt(0) + "***" + local.charAt(local.length() - 1) + "@" + domain;
+	}
+
+	/** 信用分→徽章等级 */
+	private String getCreditBadge(Integer score) {
+		if (score == null) return "GRAY";
+		if (score < 60)  return "RED";
+		if (score <= 80) return "GRAY";
+		if (score <= 100) return "BLUE";
+		return "GOLD";
 	}
 
 	@Override
@@ -269,5 +298,28 @@ public class UserServiceImpl implements UserService {
 				RedisConstant.TOKEN_BLACKLIST_PREFIX + token, "",
 				jwtPropertiesConfig.getExpire(), TimeUnit.SECONDS);
 		log.info("用户登出成功，Token已加入黑名单");
+	}
+
+	@Override
+	public ReviewListResp getReviews(Long targetUserId, int page, int size) {
+		User targetUser = userMapper.findById(targetUserId);
+		if (targetUser == null) {
+			throw new BusinessException(MessageConstant.USER_NOT_FOUND);
+		}
+
+		int offset = (page - 1) * size;
+		List<ReviewResp> list = reviewMapper.findByRevieweeId(targetUserId, offset, size);
+		long total = reviewMapper.countByRevieweeId(targetUserId);
+		ReviewMapper.ReviewStats stats = reviewMapper.selectStats(targetUserId);
+
+		return ReviewListResp.builder()
+				.list(list)
+				.total(total)
+				.page(page)
+				.size(size)
+				.goodCount(stats.getGoodCount())
+				.neutralCount(stats.getNeutralCount())
+				.badCount(stats.getBadCount())
+				.build();
 	}
 }

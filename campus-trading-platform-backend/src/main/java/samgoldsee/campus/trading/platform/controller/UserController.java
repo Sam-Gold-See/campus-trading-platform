@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import samgoldsee.campus.trading.platform.common.CommonResult;
 import samgoldsee.campus.trading.platform.dto.reponse.LoginResp;
+import samgoldsee.campus.trading.platform.dto.reponse.ReviewListResp;
 import samgoldsee.campus.trading.platform.dto.reponse.UserProfileResp;
 import samgoldsee.campus.trading.platform.dto.request.EditNicknameReq;
 import samgoldsee.campus.trading.platform.dto.request.EditPasswordReq;
@@ -84,5 +86,16 @@ public class UserController {
 		String token = (String) request.getAttribute("Authorization");
 		userService.logout(token);
 		return CommonResult.ok();
+	}
+
+	@GetMapping("/reviews")
+	public CommonResult<ReviewListResp> getReviews(
+			@RequestParam(required = false) Long targetUserId,
+			@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Long queryUserId = (targetUserId != null) ? targetUserId : Long.valueOf(userId);
+		ReviewListResp response = userService.getReviews(queryUserId, page, size);
+		return CommonResult.ok(response);
 	}
 }

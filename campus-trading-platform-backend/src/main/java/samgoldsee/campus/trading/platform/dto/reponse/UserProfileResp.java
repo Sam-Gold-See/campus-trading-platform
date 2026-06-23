@@ -17,4 +17,6 @@ public class UserProfileResp {
 	private Integer userStatus;
 	private Integer isAdmin;
 	private LocalDateTime createdAt;
+	/** 信用分徽章等级：RED(<60) / GRAY(60-80) / BLUE(80-100) / GOLD(>100) */
+	private String creditBadge;
 }
