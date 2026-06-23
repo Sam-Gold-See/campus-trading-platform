@@ -35,4 +35,11 @@ public class ItemController {
 		itemService.offline(Long.valueOf(userId), id);
 		return CommonResult.ok();
 	}
+
+	@PutMapping("/{id}/bump")
+	public CommonResult<Void> bump(@PathVariable Long id) {
+		String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		itemService.bump(Long.valueOf(userId), id);
+		return CommonResult.ok();
+	}
 }

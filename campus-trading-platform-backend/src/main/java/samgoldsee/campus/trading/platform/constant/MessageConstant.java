@@ -13,4 +13,5 @@ public class MessageConstant {
 	public static final String ITEM_NOT_FOUND = "帖文不存在";
 	public static final String ITEM_NOT_OWNER = "无权操作该帖文";
 	public static final String ITEM_STATUS_INVALID = "帖文状态不允许此操作";
+	public static final String BUMP_LIMIT_EXCEEDED = "今日已达到擦亮次数上限";
 }

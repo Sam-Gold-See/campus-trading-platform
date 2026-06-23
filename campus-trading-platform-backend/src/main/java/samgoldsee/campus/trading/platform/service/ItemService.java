@@ -9,4 +9,7 @@ public interface ItemService {
 
 	/** 提前下架 */
 	void offline(Long userId, Long itemId);
+
+	/** 擦亮 */
+	void bump(Long userId, Long itemId);
 }
