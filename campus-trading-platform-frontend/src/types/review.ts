@@ -1,20 +1,21 @@
 export type RatingType = 1 | 0 | -1 // 好评/中评/差评
 
 export interface Review {
-  reviewId: number
-  reviewerId: number
-  revieweeId: number
+  id: number
   itemId: number
-  ratingType: RatingType
+  reviewerId: number
+  reviewerNickname?: string
+  revieweeId: number
+  ratingType: number // 1=好评 0=中评 -1=差评
   tags: string[]
-  comment?: string
-  createTime: string
+  content?: string
+  createdAt: string
 }
 
-export interface ReviewCreateParams {
-  revieweeId: number
+export interface SubmitReviewParams {
   itemId: number
-  ratingType: RatingType
-  tags: string[]
-  comment?: string
+  revieweeId: number
+  ratingType: number // 1=好评 0=中评 -1=差评
+  tags?: string[]
+  content?: string
 }

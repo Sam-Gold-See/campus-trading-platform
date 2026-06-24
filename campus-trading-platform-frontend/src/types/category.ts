@@ -1,5 +1,11 @@
 export interface Category {
-  categoryId: number
+  id: number
   name: string
-  parentId?: number
+  sortOrder?: number
+}
+
+export interface ConfigDict {
+  categories: Category[]
+  campuses: string[]
+  priceRanges: string[]
 }

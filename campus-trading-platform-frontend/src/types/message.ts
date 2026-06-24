@@ -1,11 +1,11 @@
 export interface Message {
-  messageId: number
+  id: number
   senderId: number
   receiverId: number
   itemId: number
   content: string
   isRead: boolean
-  createTime: string
+  createdAt: string
 }
 
 export interface Conversation {
@@ -17,4 +17,10 @@ export interface Conversation {
   lastMessage: string
   lastTime: string
   unreadCount: number
+}
+
+export interface SendMessageParams {
+  receiverId: number
+  itemId: number
+  content: string
 }

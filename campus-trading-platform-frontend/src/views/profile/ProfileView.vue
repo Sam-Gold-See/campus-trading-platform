@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   ElTabs, ElTabPane, ElCard, ElDescriptions, ElDescriptionsItem,
   ElTag, ElForm, ElFormItem, ElInput, ElButton, ElDialog,
-  ElMessage, ElMessageBox, ElProgress,
+  ElMessage, ElMessageBox, ElProgress, ElBadge,
+  ElEmpty, ElSkeleton,
 } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { useItemStore } from '@/stores/item'
 import { editNickname, editPassword } from '@/api/user'
+import { getUserReviews } from '@/api/review'
+import type { Review } from '@/types/review'
+import type { Item } from '@/types/item'
 
 const userStore = useUserStore()
-const activeTab = ref('info')
+const itemStore = useItemStore()
 
+const activeTab = ref('info')
 const user = computed(() => userStore.userInfo)
 
 // 信用分徽章
@@ -133,6 +139,68 @@ const openNicknameDialog = () => {
   nicknameForm.value.nickname = ''
   showNicknameDialog.value = true
 }
+
+// 我的发布列表
+const myItemsStatus = ref<number | undefined>(undefined)
+const myItemsStatusTabs = [
+  { label: '进行中', value: 0 },
+  { label: '已成交', value: 1 },
+  { label: '已失效', value: 2 },
+]
+
+async function loadMyItems(status?: number) {
+  myItemsStatus.value = status
+  await itemStore.loadMyItems(status)
+}
+
+// 物品操作
+async function handleBumpItem(item: Item) {
+  try {
+    await itemStore.bump(item.id)
+    ElMessage.success('擦亮成功')
+  } catch {
+    // error handled
+  }
+}
+
+async function handleOfflineItem(item: Item) {
+  await ElMessageBox.confirm('确定下架该信息吗？', '下架', { type: 'warning' })
+  try {
+    await itemStore.offline(item.id)
+    ElMessage.success('已下架')
+  } catch {
+    // error handled
+  }
+}
+
+function viewItemDetail(item: Item) {
+  // 跳转到物品详情
+  window.location.href = `/item/${item.id}`
+}
+
+// 我的评价列表
+const reviews = ref<Review[]>([])
+const reviewsLoading = ref(false)
+
+async function loadReviews() {
+  if (!user.value?.id) return
+  reviewsLoading.value = true
+  try {
+    reviews.value = await getUserReviews(user.value.id)
+  } finally {
+    reviewsLoading.value = false
+  }
+}
+
+// 格式化时间
+function formatTime(time: string) {
+  return new Date(time).toLocaleDateString()
+}
+
+onMounted(async () => {
+  await userStore.fetchProfile()
+  await loadMyItems()
+})
 </script>
 
 <template>
@@ -190,6 +258,86 @@ const openNicknameDialog = () => {
             <ElButton @click="activeTab = 'password'">修改密码</ElButton>
             <ElButton type="danger" @click="userStore.logout()">退出登录</ElButton>
           </div>
+        </ElCard>
+      </ElTabPane>
+
+      <ElTabPane label="我的发布" name="myItems">
+        <ElCard>
+          <!-- 状态筛选 -->
+          <div style="margin-bottom: 16px">
+            <ElButton
+              v-for="tab in myItemsStatusTabs"
+              :key="tab.value"
+              :type="myItemsStatus === tab.value ? 'primary' : 'default'"
+              @click="loadMyItems(tab.value)"
+            >
+              {{ tab.label }}
+            </ElButton>
+          </div>
+
+          <!-- 物品列表 -->
+          <div v-if="itemStore.myItemsLoading">
+            <ElSkeleton :rows="3" animated />
+          </div>
+          <div v-else-if="itemStore.myItems.length === 0">
+            <ElEmpty description="暂无发布记录" />
+          </div>
+          <div v-else class="my-items-list">
+            <ElCard v-for="item in itemStore.myItems" :key="item.id" shadow="hover" style="margin-bottom: 10px">
+              <div style="display: flex; justify-content: space-between">
+                <div style="flex: 1">
+                  <ElTag :type="item.type === 1 ? 'warning' : 'success'" size="small">
+                    {{ item.type === 1 ? '求购' : '转让' }}
+                  </ElTag>
+                  <span style="margin-left: 8px">{{ item.content }}</span>
+                  <div style="color: #909399; margin-top: 4px">
+                    {{ formatTime(item.createdAt) }} | {{ item.price ? `¥${item.price}` : '面议' }}
+                  </div>
+                </div>
+                <div v-if="myItemsStatus === 0">
+                  <ElButton size="small" @click="handleBumpItem(item)">擦亮</ElButton>
+                  <ElButton size="small" type="warning" @click="handleOfflineItem(item)">下架</ElButton>
+                  <ElButton size="small" type="success" @click="viewItemDetail(item)">标记成交</ElButton>
+                </div>
+              </div>
+            </ElCard>
+          </div>
+        </ElCard>
+      </ElTabPane>
+
+      <ElTabPane label="收到的评价" name="reviews">
+        <ElCard>
+          <div v-if="reviewsLoading">
+            <ElSkeleton :rows="3" animated />
+          </div>
+          <div v-else-if="reviews.length === 0">
+            <ElEmpty description="暂无评价记录" />
+          </div>
+          <div v-else class="reviews-list">
+            <ElCard v-for="review in reviews" :key="review.id" shadow="hover" style="margin-bottom: 10px">
+              <div style="display: flex; gap: 16px">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center">
+                  {{ review.reviewerNickname?.charAt(0) }}
+                </div>
+                <div style="flex: 1">
+                  <div>
+                    <span style="font-weight: bold">{{ review.reviewerNickname }}</span>
+                    <ElTag :type="review.ratingType === 1 ? 'success' : review.ratingType === -1 ? 'danger' : 'info'" size="small">
+                      {{ review.ratingType === 1 ? '好评' : review.ratingType === -1 ? '差评' : '中评' }}
+                    </ElTag>
+                    <span style="color: #909399; margin-left: 8px">{{ formatTime(review.createdAt) }}</span>
+                  </div>
+                  <div v-if="review.tags && review.tags.length > 0" style="margin-top: 8px">
+                    <ElTag v-for="tag in review.tags" :key="tag" size="small" style="margin-right: 4px">{{ tag }}</ElTag>
+                  </div>
+                  <div v-if="review.content" style="margin-top: 8px; color: #606266">
+                    {{ review.content }}
+                  </div>
+                </div>
+              </div>
+            </ElCard>
+          </div>
+          <ElButton @click="loadReviews">加载评价</ElButton>
         </ElCard>
       </ElTabPane>
 
@@ -261,3 +409,15 @@ const openNicknameDialog = () => {
     <ElButton type="primary" @click="userStore.logout()">返回登录</ElButton>
   </div>
 </template>
+
+<style scoped>
+.my-items-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+}
+</style>

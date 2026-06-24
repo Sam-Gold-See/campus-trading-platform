@@ -13,8 +13,12 @@ export function register(params: RegisterParams) {
   return request.post<AuthResult>('/user/register', params)
 }
 
-export function getUserProfile() {
+export function getMyProfile() {
   return request.get<User>('/user/profile')
+}
+
+export function getUserProfile(userId: number) {
+  return request.get<User>(`/user/profile/${userId}`)
 }
 
 export function editNickname(params: EditNicknameParams) {

@@ -1,0 +1,150 @@
+/* ========== 导入赛博朋克字体 ========== */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* =====================================================
+   赛博朋克深色主题 - CSS 变量定义
+   ===================================================== */
+
+:root {
+  /* ========== 核心色彩系统 ========== */
+
+  /* 主色调 - 霓虹青色 (Cyber Cyan) */
+  --cyber-primary: #00f0ff;
+  --cyber-primary-light: #4df8ff;
+  --cyber-primary-dark: #00c4cc;
+  --cyber-primary-glow: rgba(0, 240, 255, 0.5);
+
+  /* 辅助色 - 霓虹粉色 (Neon Pink) */
+  --cyber-secondary: #ff00aa;
+  --cyber-secondary-light: #ff4dbd;
+  --cyber-secondary-dark: #cc0088;
+  --cyber-secondary-glow: rgba(255, 0, 170, 0.5);
+
+  /* 强调色 - 霓虹紫色 (Neon Purple) */
+  --cyber-accent: #9d00ff;
+  --cyber-accent-light: #b84dff;
+  --cyber-accent-dark: #7a00cc;
+  --cyber-accent-glow: rgba(157, 0, 255, 0.5);
+
+  /* 警告色 - 霓虹橙色 */
+  --cyber-warning: #ff9500;
+  --cyber-warning-glow: rgba(255, 149, 0, 0.5);
+
+  /* 成功色 - 霓虹绿色 */
+  --cyber-success: #00ff88;
+  --cyber-success-glow: rgba(0, 255, 136, 0.5);
+
+  /* 危险色 - 霓虹红色 */
+  --cyber-danger: #ff0055;
+  --cyber-danger-glow: rgba(255, 0, 85, 0.5);
+
+  /* ========== 背景色系统 ========== */
+
+  /* 最深背景 */
+  --cyber-bg-darkest: #0a0a0f;
+  /* 深色背景 */
+  --cyber-bg-dark: #0d0d14;
+  /* 次深背景 */
+  --cyber-bg-darker: #12121a;
+  /* 中等背景 */
+  --cyber-bg-medium: #1a1a24;
+  /* 卡片背景 */
+  --cyber-bg-card: #1e1e28;
+  /* 悬浮背景 */
+  --cyber-bg-hover: #252530;
+  /* 输入框背景 */
+  --cyber-bg-input: #15151f;
+
+  /* ========== 文字颜色系统 ========== */
+
+  /* 主要文字 */
+  --cyber-text-primary: #e0e0e8;
+  /* 次要文字 */
+  --cyber-text-secondary: #a0a0b0;
+  /* 占位文字 */
+  --cyber-text-placeholder: #606070;
+  /* 禁用文字 */
+  --cyber-text-disabled: #404050;
+  /* 反色文字（用于深色背景上的文字） */
+  --cyber-text-inverse: #0a0a0f;
+
+  /* ========== 边框系统 ========== */
+
+  /* 基础边框 */
+  --cyber-border-base: rgba(0, 240, 255, 0.2);
+  /* 高亮边框 */
+  --cyber-border-highlight: rgba(0, 240, 255, 0.4);
+  /* 强调边框 */
+  --cyber-border-accent: rgba(255, 0, 170, 0.3);
+
+  /* ========== 圆角系统 ========== */
+
+  --cyber-radius-xs: 2px;
+  --cyber-radius-sm: 4px;
+  --cyber-radius-base: 6px;
+  --cyber-radius-lg: 8px;
+  --cyber-radius-xl: 12px;
+
+  /* ========== 阴影系统（霓虹发光效果） ========== */
+
+  /* 基础阴影 */
+  --cyber-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* 卡片阴影 */
+  --cyber-shadow-card: 0 4px 16px rgba(0, 0, 0, 0.5);
+  /* 悬浮阴影 */
+  --cyber-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+  /* 霓虹发光效果 */
+  --cyber-glow-primary: 0 0 20px var(--cyber-primary-glow), 0 0 40px var(--cyber-primary-glow);
+  --cyber-glow-secondary: 0 0 20px var(--cyber-secondary-glow), 0 0 40px var(--cyber-secondary-glow);
+  --cyber-glow-accent: 0 0 20px var(--cyber-accent-glow), 0 0 40px var(--cyber-accent-glow);
+
+  /* 边框发光 */
+  --cyber-border-glow: 0 0 10px var(--cyber-primary-glow), inset 0 0 10px var(--cyber-primary-glow);
+
+  /* ========== 字体系统 ========== */
+
+  /* 字体族 */
+  --cyber-font-family: 'Rajdhani', 'Orbitron', 'Share Tech Mono', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --cyber-font-mono: 'Share Tech Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* 字号 */
+  --cyber-font-size-xs: 12px;
+  --cyber-font-size-sm: 13px;
+  --cyber-font-size-base: 14px;
+  --cyber-font-size-lg: 16px;
+  --cyber-font-size-xl: 18px;
+  --cyber-font-size-2xl: 20px;
+  --cyber-font-size-3xl: 24px;
+  --cyber-font-size-4xl: 32px;
+
+  /* 字重 */
+  --cyber-font-weight-normal: 400;
+  --cyber-font-weight-medium: 500;
+  --cyber-font-weight-semibold: 600;
+  --cyber-font-weight-bold: 700;
+
+  /* 行高 */
+  --cyber-line-height-tight: 1.25;
+  --cyber-line-height-base: 1.5;
+  --cyber-line-height-relaxed: 1.75;
+
+  /* ========== 间距系统 ========== */
+
+  --cyber-spacing-xs: 4px;
+  --cyber-spacing-sm: 8px;
+  --cyber-spacing-base: 12px;
+  --cyber-spacing-lg: 16px;
+  --cyber-spacing-xl: 24px;
+  --cyber-spacing-2xl: 32px;
+  --cyber-spacing-3xl: 48px;
+
+  /* ========== 动画系统 ========== */
+
+  --cyber-transition-fast: 0.15s ease;
+  --cyber-transition-base: 0.25s ease;
+  --cyber-transition-slow: 0.35s ease;
+
+  /* 扫描线动画 */
+  --cyber-scanline-duration: 8s;
+}
