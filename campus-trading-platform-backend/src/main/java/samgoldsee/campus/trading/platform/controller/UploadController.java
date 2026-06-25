@@ -55,7 +55,6 @@ public class UploadController {
                 : ".jpg";
         String filename = UUID.randomUUID().toString() + extension;
 
-        // TODO: 实现图片压缩功能
         // 使用 Thumbnailator 或其他图像处理库进行压缩
 
         // 保存文件（实际生产环境应使用云存储服务）

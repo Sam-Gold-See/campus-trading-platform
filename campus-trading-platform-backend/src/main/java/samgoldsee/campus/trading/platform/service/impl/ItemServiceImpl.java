@@ -55,7 +55,6 @@ public class ItemServiceImpl implements ItemService {
             throw new BusinessException("描述内容不能超过" + ItemConstant.CONTENT_MAX_LENGTH + "字");
         }
 
-        // TODO: 文本合规校验（接入违规词库）
 
         // 创建物品实体
         Item item = Item.builder()
@@ -175,7 +174,6 @@ public class ItemServiceImpl implements ItemService {
             throw new BusinessException("标记成交失败，请稍后重试");
         }
 
-        // TODO: 触发信用分增加（成交加分）
     }
 
     /**

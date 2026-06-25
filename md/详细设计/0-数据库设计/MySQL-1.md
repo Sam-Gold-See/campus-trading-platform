@@ -10,8 +10,11 @@
 | `nickname`      | VARCHAR(50)  | NOT NULL              | 昵称                  |
 | `avatar_url`    | VARCHAR(255) | NULL                  | 头像（采用系统默认或淡化处理的URL） |
 | `credit_score`  | INT          | DEFAULT 100           | **信用分**（初始100）      |
-| `user_status`   | TINYINT      | DEFAULT 1             | 账号状态 (1正常, 0禁言拦截发布) |
+| `user_status`   | TINYINT      | DEFAULT 0             | 账号状态 (0正常, 1禁言拦截发布) |
+| `is_admin`      | TINYINT      | DEFAULT 0             | 是否管理员 (0普通用户, 1管理员) |
+| `last_nickname_change` | DATETIME | NULL              | 上次昵称修改时间 |
 | `created_at`    | DATETIME     | CURRENT_TIMESTAMP     | 注册时间                |
+| `updated_at`    | DATETIME     | CURRENT_TIMESTAMP ON UPDATE | 更新时间 |
 
 ### 2. `category` (分类字典表)
 

@@ -86,7 +86,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         reviewMapper.insert(review);
 
-        // TODO: 触发信用分更新（异步）
         // updateCreditScore(request.getRevieweeId(), request.getRatingType());
     }
 
