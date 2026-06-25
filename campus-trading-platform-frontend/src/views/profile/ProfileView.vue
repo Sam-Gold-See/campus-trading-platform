@@ -8,6 +8,7 @@ import {
 } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useItemStore } from '@/stores/item'
+import { useRouter } from 'vue-router'
 import { editNickname, editPassword } from '@/api/user'
 import { getUserReviews } from '@/api/review'
 import type { Review } from '@/types/review'
@@ -15,6 +16,7 @@ import type { Item } from '@/types/item'
 
 const userStore = useUserStore()
 const itemStore = useItemStore()
+const router = useRouter()
 
 const activeTab = ref('info')
 const user = computed(() => userStore.userInfo)
@@ -178,6 +180,13 @@ function viewItemDetail(item: Item) {
   window.location.href = `/item/${item.id}`
 }
 
+function goToReview(item: Item) {
+  // 判断当前用户是卖家还是买家，评价对方
+  const currentUserId = user.value?.id
+  const revieweeId = item.userId === currentUserId ? item.matchedUserId : item.userId
+  router.push({ path: '/review/submit', query: { itemId: item.id, revieweeId } })
+}
+
 // 我的评价列表
 const reviews = ref<Review[]>([])
 const reviewsLoading = ref(false)
@@ -298,6 +307,11 @@ onMounted(async () => {
                   <ElButton size="small" @click="handleBumpItem(item)">擦亮</ElButton>
                   <ElButton size="small" type="warning" @click="handleOfflineItem(item)">下架</ElButton>
                   <ElButton size="small" type="success" @click="viewItemDetail(item)">标记成交</ElButton>
+                </div>
+                <div v-else-if="myItemsStatus === 1 && item.matchedUserId">
+                  <ElButton size="small" type="primary" @click="goToReview(item)">
+                    去评价
+                  </ElButton>
                 </div>
               </div>
             </ElCard>

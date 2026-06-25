@@ -213,6 +213,7 @@ public class ItemServiceImpl implements ItemService {
                 .content(item.getContent())
                 .imageUrl(item.getImageUrl())
                 .itemStatus(item.getItemStatus())
+                .matchedUserId(item.getMatchedUserId())
                 .createdAt(item.getCreatedAt())
                 .expireAt(item.getExpireAt())
                 .build();
